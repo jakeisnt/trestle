@@ -32,6 +32,13 @@ const ZoomableImage = (props: ZoomableImageProps) => {
   let dragStartPanX = 0;
   let dragStartPanY = 0;
 
+  // Mouse pan state
+  const [isMousePanning, setIsMousePanning] = createSignal(false);
+  let mouseStartX = 0;
+  let mouseStartY = 0;
+  let mouseStartPanX = 0;
+  let mouseStartPanY = 0;
+
   // Pinch-to-zoom state
   let initialDistance = 0;
   let initialScale = 1;
@@ -93,7 +100,7 @@ const ZoomableImage = (props: ZoomableImageProps) => {
     // Apply zoom transform
     imageRef.style.transform = `translateX(${panX()}px) translateY(${panY()}px) scale(${newScale})`;
     
-    // Show minimap when zoomed
+    // Show minimap when zoomed beyond 1x
     if (newScale > 1) {
       setShowMinimap(true);
     }
@@ -115,16 +122,19 @@ const ZoomableImage = (props: ZoomableImageProps) => {
   const handleZoomOut = () => {
     if (!imageRef) return;
     
-    const newScale = Math.max(0.5, currentScale() - 0.2);
+    const newScale = Math.max(1, currentScale() - 0.2);
     setCurrentScale(newScale);
     setIsScrollZooming(true);
     
     // Apply zoom transform
     imageRef.style.transform = `translateX(${panX()}px) translateY(${panY()}px) scale(${newScale})`;
     
-    // Hide minimap when not zoomed
+    // Hide minimap when at 1x zoom
     if (newScale <= 1) {
       setShowMinimap(false);
+      // Reset pan when at 1x zoom
+      setPanX(0);
+      setPanY(0);
     }
     
     // Clear any existing timeout
@@ -136,6 +146,30 @@ const ZoomableImage = (props: ZoomableImageProps) => {
     scrollZoomTimeout = window.setTimeout(() => {
       setIsScrollZooming(false);
     }, 150);
+  };
+
+  /**
+   * Calculate the initial zoom level to ensure image fills container
+   */
+  const getInitialZoom = () => {
+    if (!imageRef || !containerRef) return 1;
+    
+    const containerRect = containerRef.getBoundingClientRect();
+    const containerWidth = containerRect.width;
+    const containerHeight = containerRect.height;
+    
+    // Get the natural image dimensions
+    const naturalWidth = imageRef.naturalWidth;
+    const naturalHeight = imageRef.naturalHeight;
+    
+    if (naturalWidth === 0 || naturalHeight === 0) return 1;
+    
+    // Calculate the scale needed to fill the container
+    const scaleX = containerWidth / naturalWidth;
+    const scaleY = containerHeight / naturalHeight;
+    
+    // Use the larger scale to ensure the image fills the container
+    return Math.max(scaleX, scaleY);
   };
 
   /**
@@ -221,6 +255,49 @@ const ZoomableImage = (props: ZoomableImageProps) => {
   };
 
   /**
+   * Handle mouse pan start
+   */
+  const handleMousePanStart = (e: MouseEvent) => {
+    if (!imageRef || currentScale() <= 1) return;
+    
+    e.preventDefault();
+    setIsMousePanning(true);
+    
+    mouseStartX = e.clientX;
+    mouseStartY = e.clientY;
+    mouseStartPanX = panX();
+    mouseStartPanY = panY();
+  };
+
+  /**
+   * Handle mouse pan move
+   */
+  const handleMousePanMove = (e: MouseEvent) => {
+    if (!isMousePanning() || !imageRef) return;
+    
+    e.preventDefault();
+    
+    const deltaX = e.clientX - mouseStartX;
+    const deltaY = e.clientY - mouseStartY;
+    
+    const newPanX = mouseStartPanX + deltaX;
+    const newPanY = mouseStartPanY + deltaY;
+    
+    setPanX(newPanX);
+    setPanY(newPanY);
+    
+    // Apply pan transform
+    imageRef.style.transform = `translateX(${newPanX}px) translateY(${newPanY}px) scale(${currentScale()})`;
+  };
+
+  /**
+   * Handle mouse pan end
+   */
+  const handleMousePanEnd = () => {
+    setIsMousePanning(false);
+  };
+
+  /**
    * Handle wheel events for scroll-to-zoom
    */
   const handleWheel = (e: WheelEvent) => {
@@ -237,18 +314,21 @@ const ZoomableImage = (props: ZoomableImageProps) => {
     const zoomFactor = 0.1; // How much to zoom per scroll step
     const newScale = currentScale() + (deltaY > 0 ? -zoomFactor : zoomFactor);
     
-    // Limit zoom between 0.5x and 3x
-    const clampedScale = Math.max(0.5, Math.min(3, newScale));
+    // Limit zoom between 1x and 3x
+    const clampedScale = Math.max(1, Math.min(3, newScale));
     
     if (clampedScale !== currentScale()) {
       setCurrentScale(clampedScale);
       setIsScrollZooming(true);
       
-      // Show minimap when zoomed
+      // Show minimap when zoomed beyond 1x
       if (clampedScale > 1) {
         setShowMinimap(true);
       } else {
         setShowMinimap(false);
+        // Reset pan when at 1x zoom
+        setPanX(0);
+        setPanY(0);
       }
       
       // Calculate zoom center based on mouse position relative to image
@@ -324,8 +404,8 @@ const ZoomableImage = (props: ZoomableImageProps) => {
       const currentDistance = getDistance(touch1, touch2);
       const scale = (currentDistance / initialDistance) * initialScale;
       
-      // Limit zoom between 0.5x and 3x
-      const clampedScale = Math.max(0.5, Math.min(3, scale));
+      // Limit zoom between 1x and 3x
+      const clampedScale = Math.max(1, Math.min(3, scale));
       setCurrentScale(clampedScale);
       
       // Calculate pan offset to keep zoom centered
@@ -339,11 +419,14 @@ const ZoomableImage = (props: ZoomableImageProps) => {
       // Apply zoom and pan transforms
       imageRef.style.transform = `translateX(${panX()}px) translateY(${panY()}px) scale(${clampedScale})`;
       
-      // Show minimap when zoomed
+      // Show minimap when zoomed beyond 1x
       if (clampedScale > 1) {
         setShowMinimap(true);
       } else {
         setShowMinimap(false);
+        // Reset pan when at 1x zoom
+        setPanX(0);
+        setPanY(0);
       }
       
       // Update dimensions for minimap
@@ -383,12 +466,26 @@ const ZoomableImage = (props: ZoomableImageProps) => {
     }
     
     if (imageRef) {
-      imageRef.addEventListener('load', updateDimensions);
+      imageRef.addEventListener('load', () => {
+        updateDimensions();
+        // Set initial scale to fill container when image loads
+        const initialZoom = getInitialZoom();
+        setCurrentScale(initialZoom);
+        if (imageRef) {
+          imageRef.style.transform = `translateX(0px) translateY(0px) scale(${initialZoom})`;
+        }
+      });
     }
     
-    // Add global mouse/touch event listeners for minimap dragging
-    const handleGlobalMouseMove = (e: MouseEvent) => handleMinimapDragMove(e);
-    const handleGlobalMouseUp = () => handleMinimapDragEnd();
+    // Add global mouse/touch event listeners for minimap dragging and mouse panning
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      handleMinimapDragMove(e);
+      handleMousePanMove(e);
+    };
+    const handleGlobalMouseUp = () => {
+      handleMinimapDragEnd();
+      handleMousePanEnd();
+    };
     const handleGlobalTouchMove = (e: TouchEvent) => handleMinimapDragMove(e);
     const handleGlobalTouchEnd = () => handleMinimapDragEnd();
     
@@ -447,13 +544,15 @@ const ZoomableImage = (props: ZoomableImageProps) => {
           "max-width": "95%",
           "object-fit": "contain",
           "user-select": "none",
-          "pointer-events": "none",
+          "pointer-events": currentScale() > 1 ? "auto" : "none",
+          "cursor": isMousePanning() ? "grabbing" : (currentScale() > 1 ? "grab" : "default"),
           "transform-origin": "center center",
-          transition: isZooming() || isScrollZooming() ? "none" : "opacity 100ms",
+          transition: isZooming() || isScrollZooming() || isDraggingMinimap() || isMousePanning() ? "none" : "opacity 100ms",
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
+        onMouseDown={handleMousePanStart}
       />
       
       {/* Minimap and Zoom Controls */}
