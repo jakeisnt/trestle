@@ -1,0 +1,19 @@
+.iconButton {
+  cursor: pointer;
+  opacity: 0.5;
+
+  color: white;
+  background-color: transparent;
+  border-radius: 100%;
+
+  border: unset;
+
+  height: 40px;
+  width: 40px;
+  padding: auto;
+
+  transition: opacity 0.3s;
+  &:hover {
+    opacity: 1;
+  }
+}

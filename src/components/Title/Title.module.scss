@@ -1,0 +1,61 @@
+.title {
+    position: relative;
+    width: 100%;
+    background-color: var(--color-bg);
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-left: 8px;
+
+    > .backButton {
+        display: block;
+        padding-top: 6px;
+        padding-left: 8px;
+        height: 32px;
+        width: 32px;
+        margin-right: 8px;
+    }
+
+    > h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+    }
+}
+
+
+@media only screen and (max-width: 600px) {
+    .title {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+
+        margin-left: 0;
+        margin-top: 8px;
+        margin-bottom: 8px;
+        padding-right: 8px;
+
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+
+        > .backButton {
+            display: block;
+            padding-top: 6px;
+            padding-left: 8px;
+            height: 32px;
+            width: 32px;
+        }
+
+        > h1 {
+            margin: auto 0;
+            padding-top: 0;
+            font-size: 20px;
+            font-weight: 600;
+        }
+    }
+}
