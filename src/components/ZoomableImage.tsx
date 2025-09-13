@@ -1,4 +1,4 @@
-import { createSignal, onMount, onCleanup } from "solid-js";
+import { createSignal, onMount, onCleanup, createEffect, Show } from "solid-js";
 
 type ZoomableImageProps = {
   src: string;
@@ -18,6 +18,11 @@ const ZoomableImage = (props: ZoomableImageProps) => {
   const [currentScale, setCurrentScale] = createSignal(1);
   const [panX, setPanX] = createSignal(0);
   const [panY, setPanY] = createSignal(0);
+
+  // Minimap state
+  const [showMinimap, setShowMinimap] = createSignal(false);
+  const [imageDimensions, setImageDimensions] = createSignal({ width: 0, height: 0 });
+  const [containerDimensions, setContainerDimensions] = createSignal({ width: 0, height: 0 });
 
   // Pinch-to-zoom state
   let initialDistance = 0;
@@ -58,12 +63,91 @@ const ZoomableImage = (props: ZoomableImageProps) => {
     setPanY(0);
     setIsZooming(false);
     setIsScrollZooming(false);
+    setShowMinimap(false);
     
     if (scrollZoomTimeout) {
       window.clearTimeout(scrollZoomTimeout);
     }
     
     imageRef.style.transform = "translateX(0px) translateY(0px) scale(1)";
+  };
+
+  /**
+   * Handle zoom in button click
+   */
+  const handleZoomIn = () => {
+    if (!imageRef) return;
+    
+    const newScale = Math.min(3, currentScale() + 0.2);
+    setCurrentScale(newScale);
+    setIsScrollZooming(true);
+    
+    // Apply zoom transform
+    imageRef.style.transform = `translateX(${panX()}px) translateY(${panY()}px) scale(${newScale})`;
+    
+    // Show minimap when zoomed
+    if (newScale > 1) {
+      setShowMinimap(true);
+    }
+    
+    // Clear any existing timeout
+    if (scrollZoomTimeout) {
+      window.clearTimeout(scrollZoomTimeout);
+    }
+    
+    // Set timeout to disable scroll zooming after a brief delay
+    scrollZoomTimeout = window.setTimeout(() => {
+      setIsScrollZooming(false);
+    }, 150);
+  };
+
+  /**
+   * Handle zoom out button click
+   */
+  const handleZoomOut = () => {
+    if (!imageRef) return;
+    
+    const newScale = Math.max(0.5, currentScale() - 0.2);
+    setCurrentScale(newScale);
+    setIsScrollZooming(true);
+    
+    // Apply zoom transform
+    imageRef.style.transform = `translateX(${panX()}px) translateY(${panY()}px) scale(${newScale})`;
+    
+    // Hide minimap when not zoomed
+    if (newScale <= 1) {
+      setShowMinimap(false);
+    }
+    
+    // Clear any existing timeout
+    if (scrollZoomTimeout) {
+      window.clearTimeout(scrollZoomTimeout);
+    }
+    
+    // Set timeout to disable scroll zooming after a brief delay
+    scrollZoomTimeout = window.setTimeout(() => {
+      setIsScrollZooming(false);
+    }, 150);
+  };
+
+  /**
+   * Update image and container dimensions for minimap
+   */
+  const updateDimensions = () => {
+    if (imageRef && containerRef) {
+      const imgRect = imageRef.getBoundingClientRect();
+      const containerRect = containerRef.getBoundingClientRect();
+      
+      setImageDimensions({
+        width: imgRect.width / currentScale(),
+        height: imgRect.height / currentScale()
+      });
+      
+      setContainerDimensions({
+        width: containerRect.width,
+        height: containerRect.height
+      });
+    }
   };
 
   /**
@@ -90,6 +174,13 @@ const ZoomableImage = (props: ZoomableImageProps) => {
       setCurrentScale(clampedScale);
       setIsScrollZooming(true);
       
+      // Show minimap when zoomed
+      if (clampedScale > 1) {
+        setShowMinimap(true);
+      } else {
+        setShowMinimap(false);
+      }
+      
       // Calculate zoom center based on mouse position relative to image
       const rect = containerRef.getBoundingClientRect();
       const centerX = e.clientX - rect.left - rect.width / 2;
@@ -102,6 +193,9 @@ const ZoomableImage = (props: ZoomableImageProps) => {
       
       // Apply zoom transform
       imageRef.style.transform = `translateX(${panX()}px) translateY(${panY()}px) scale(${clampedScale})`;
+      
+      // Update dimensions for minimap
+      updateDimensions();
       
       // Clear any existing timeout
       if (scrollZoomTimeout) {
@@ -175,6 +269,16 @@ const ZoomableImage = (props: ZoomableImageProps) => {
       // Apply zoom and pan transforms
       imageRef.style.transform = `translateX(${panX()}px) translateY(${panY()}px) scale(${clampedScale})`;
       
+      // Show minimap when zoomed
+      if (clampedScale > 1) {
+        setShowMinimap(true);
+      } else {
+        setShowMinimap(false);
+      }
+      
+      // Update dimensions for minimap
+      updateDimensions();
+      
       return;
     }
 
@@ -202,10 +306,21 @@ const ZoomableImage = (props: ZoomableImageProps) => {
     }
   };
 
-  // Set up wheel event listener
+  // Set up wheel event listener and image load handler
   onMount(() => {
     if (containerRef) {
       containerRef.addEventListener('wheel', handleWheel, { passive: false });
+    }
+    
+    if (imageRef) {
+      imageRef.addEventListener('load', updateDimensions);
+    }
+  });
+
+  // Update dimensions when scale or pan changes
+  createEffect(() => {
+    if (currentScale() > 1) {
+      updateDimensions();
     }
   });
 
@@ -251,6 +366,113 @@ const ZoomableImage = (props: ZoomableImageProps) => {
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       />
+      
+      {/* Minimap and Zoom Controls */}
+      <Show when={showMinimap()}>
+        <div
+          style={{
+            position: "absolute",
+            bottom: "20px",
+            right: "20px",
+            display: "flex",
+            "flex-direction": "column",
+            "align-items": "center",
+            gap: "10px",
+            "z-index": 10,
+          }}
+        >
+          {/* Minimap */}
+          <div
+            style={{
+              width: "120px",
+              height: "80px",
+              border: "2px solid rgba(255, 255, 255, 0.8)",
+              "border-radius": "4px",
+              overflow: "hidden",
+              position: "relative",
+              "background-color": "rgba(0, 0, 0, 0.7)",
+              "backdrop-filter": "blur(4px)",
+            }}
+          >
+            {/* Full image in minimap */}
+            <img
+              src={props.src}
+              alt="Minimap"
+              style={{
+                width: "100%",
+                height: "100%",
+                "object-fit": "contain",
+                opacity: 0.6,
+              }}
+            />
+            {/* Viewport indicator */}
+            <div
+              style={{
+                position: "absolute",
+                border: "2px solid #fff",
+                "border-radius": "2px",
+                "background-color": "rgba(255, 255, 255, 0.2)",
+                left: `${Math.max(0, Math.min(100, 50 + (panX() / (imageDimensions().width * currentScale())) * 100))}%`,
+                top: `${Math.max(0, Math.min(100, 50 + (panY() / (imageDimensions().height * currentScale())) * 100))}%`,
+                width: `${Math.min(100, (containerDimensions().width / (imageDimensions().width * currentScale())) * 100)}%`,
+                height: `${Math.min(100, (containerDimensions().height / (imageDimensions().height * currentScale())) * 100)}%`,
+                transform: "translate(-50%, -50%)",
+              }}
+            />
+          </div>
+          
+          {/* Zoom Controls */}
+          <div
+            style={{
+              display: "flex",
+              gap: "8px",
+            }}
+          >
+            <button
+              type="button"
+              onClick={handleZoomOut}
+              style={{
+                width: "32px",
+                height: "32px",
+                border: "2px solid rgba(255, 255, 255, 0.8)",
+                "border-radius": "4px",
+                "background-color": "rgba(0, 0, 0, 0.7)",
+                color: "white",
+                cursor: "pointer",
+                display: "flex",
+                "align-items": "center",
+                "justify-content": "center",
+                "font-size": "16px",
+                "font-weight": "bold",
+                "backdrop-filter": "blur(4px)",
+              }}
+            >
+              −
+            </button>
+            <button
+              type="button"
+              onClick={handleZoomIn}
+              style={{
+                width: "32px",
+                height: "32px",
+                border: "2px solid rgba(255, 255, 255, 0.8)",
+                "border-radius": "4px",
+                "background-color": "rgba(0, 0, 0, 0.7)",
+                color: "white",
+                cursor: "pointer",
+                display: "flex",
+                "align-items": "center",
+                "justify-content": "center",
+                "font-size": "16px",
+                "font-weight": "bold",
+                "backdrop-filter": "blur(4px)",
+              }}
+            >
+              +
+            </button>
+          </div>
+        </div>
+      </Show>
     </div>
   );
 };
