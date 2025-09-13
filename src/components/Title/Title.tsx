@@ -21,7 +21,7 @@ const Title = (props: { children: string }) => {
 
   return (
     <>
-      <SolidTitle>{props.children} | Jake Chvatal</SolidTitle>
+      <SolidTitle>{props.children} | Trestle</SolidTitle>
       <div class={classes.title}>
         {!isRootPath() && (
           <IconButton class={classes.backButton} onClick={handleBackClick}>
