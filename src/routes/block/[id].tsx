@@ -16,6 +16,7 @@ import classes from "./block.module.scss";
 import SwipeableCard from "../../components/SwipeableCard";
 import { Close, ArrowLeft, ArrowRight, CaretUp } from "../../components/icons";
 import IconButton from "../../components/IconButton";
+import ExifData from "../../components/ExifData";
 import type { ArenaBlock } from "arena-ts";
 
 export const route = {
@@ -222,6 +223,11 @@ export default function BlockPage(props: RouteSectionProps) {
               // eslint-disable-next-line solid/no-innerhtml
               innerHTML={block()?.description_html ?? ""}
             />
+            
+            {/* Show EXIF data on desktop for image blocks */}
+            <Show when={isDesktop() && block()?.class === "Image" && block()?.image?.display?.url}>
+              <ExifData imageUrl={block()?.image?.display?.url || ""} />
+            </Show>
           </Show>
           <div
             style={{

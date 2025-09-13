@@ -20,6 +20,7 @@
     "@t3-oss/env-core": "^0.11.1",
     "@vinxi/plugin-mdx": "^3.7.2",
     "arena-ts": "^1.0.2",
+    "exif-js": "^2.3.0",
     "solid-js": "^1.9.9",
     "solid-mdx": "^0.0.7",
     "vinxi": "^0.5.8",
@@ -30,6 +31,7 @@
     "node": "22.x"
   },
   "devDependencies": {
+    "@types/exif-js": "^2.3.1",
     "sass": "^1.92.1",
     "vite": "^7.1.5"
   },
