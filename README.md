@@ -10,6 +10,7 @@ Trestle is primarily an Are.na block renderer designed for creating writing-focu
 
 - **Block Navigation**: Navigate through Are.na blocks with swipe gestures on mobile and keyboard shortcuts on desktop
 - **Are.na Integration**: Direct integration with Are.na's API for fetching and displaying blocks
+- **EXIF Data Display**: Automatically extract and display camera metadata in the desktop sidebar
 - **Responsive Interface**: Optimized experience across all device types
 - **Keyboard Controls**: Arrow key navigation with escape to close
 - **Touch Gestures**: Swipe-based navigation for mobile devices
@@ -80,6 +81,19 @@ Embed Are.na blocks in your MDX content:
 - **Mobile**: Swipe left/right to navigate between blocks, swipe down to close
 - **Desktop**: Use arrow keys to navigate, Escape to close
 - **Click**: Click any block to open the full gallery view
+
+### EXIF Data Display
+
+When viewing image blocks on desktop, the sidebar automatically displays EXIF metadata including:
+
+- Camera make and model
+- Lens information
+- Aperture, shutter speed, and ISO settings
+- Focal length and exposure mode
+- Date taken and software used
+- Copyright information
+
+The EXIF data is extracted client-side using the exif-js library and displayed in a clean, readable format.
 
 ## 🛠️ Development
 
