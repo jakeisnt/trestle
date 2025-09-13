@@ -1,6 +1,10 @@
-import { createContext, useContext, createSignal, createEffect, createMemo } from "solid-js";
-import { JSX } from "solid-js";
-import { useLocation } from "@solidjs/router";
+import {
+  createContext,
+  useContext,
+  createSignal,
+  createMemo,
+} from "solid-js";
+import type { JSX } from "solid-js";
 
 type BlockContextType = {
   registerBlock: (blockId: number, pageElement: HTMLElement) => void;

@@ -1,5 +1,5 @@
 import { createEffect, createSignal, onMount, mergeProps } from "solid-js";
-import { JSX } from "solid-js/jsx-runtime";
+import type { JSX } from "solid-js/jsx-runtime";
 
 import WithProgressCircle from "./WithProgressCircle";
 
@@ -63,7 +63,7 @@ const SwipeableCard = (inputProps: SwipeableCardProps) => {
 
     currentX = 0;
     currentY = 0;
-    cardRef.style.transform = `translateX(0px) translateY(0px) scale(1)`;
+    cardRef.style.transform = "translateX(0px) translateY(0px) scale(1)";
     setHorizontalFillAmount(0);
     setVerticalFillAmount(0);
     setDirection(undefined);
@@ -102,22 +102,28 @@ const SwipeableCard = (inputProps: SwipeableCardProps) => {
   const SWIPE_ACTION_TRIGGER_DISTANCE = 100;
   const [verticalFillAmount, setVerticalFillAmount] = createSignal(0);
   const [horizontalFillAmount, setHorizontalFillAmount] = createSignal(0);
-  const [direction, setDirection] = createSignal<"left" | "right" | "up" | "down" | undefined>();
+  const [direction, setDirection] = createSignal<
+    "left" | "right" | "up" | "down" | undefined
+  >();
 
   /**
    * Get the direction closest to the threshold.
    */
-  const getDirectionClosestToThreshold = (currentX: number, currentY: number) => {
+  const getDirectionClosestToThreshold = (
+    currentX: number,
+    currentY: number,
+  ) => {
     const xDiff = Math.abs(currentX - startX);
     const yDiff = Math.abs(currentY - startY);
 
     if (xDiff > yDiff * ratio && canSwipeHorizontally) {
       return currentX < startX ? "left" : "right";
-    } else if (yDiff > xDiff * ratio && canSwipeVertically) {
-      return currentY < startY ? "up" : "down";
-    } else {
-      return undefined;
     }
+    if (yDiff > xDiff * ratio && canSwipeVertically) {
+      return currentY < startY ? "up" : "down";
+    }
+
+    return undefined;
   };
 
   /**
@@ -132,15 +138,15 @@ const SwipeableCard = (inputProps: SwipeableCardProps) => {
     // get position of top left corner of card
     const rect = cardRef.getBoundingClientRect();
     const topLeftX = rect.left + window.scrollX;
-    // const topLeftY = rect.top + window.scrollY;
 
     // get center of card
     const centerX = topLeftX + rect.width / 2;
-    // const centerY = topLeftY + rect.height / 2;
 
     if (currentX < centerX) {
       return "left";
-    } else if (currentX > centerX) {
+    }
+
+    if (currentX > centerX) {
       return "right";
     }
   };
@@ -159,7 +165,8 @@ const SwipeableCard = (inputProps: SwipeableCardProps) => {
     const absDeltaX = Math.abs(deltaX);
     const absDeltaY = Math.abs(deltaY);
 
-    const clickDurationHasPassed = Date.now() - clickStartTime > MAX_CLICK_DURATION;
+    const clickDurationHasPassed =
+      Date.now() - clickStartTime > MAX_CLICK_DURATION;
 
     // The user hasn't swiped but they also don't intend to click.
     const weAreNotClicking = clickDurationHasPassed;
@@ -196,7 +203,7 @@ const SwipeableCard = (inputProps: SwipeableCardProps) => {
       // make the card smaller to encourage the user to swipe.
       touchStartTimeout = window.setTimeout(() => {
         if (!cardRef) return;
-        cardRef.style.transform = `translateX(0px) translateY(0px) scale(0.9)`;
+        cardRef.style.transform = "translateX(0px) translateY(0px) scale(0.9)";
       }, 250);
     }
 
@@ -223,9 +230,11 @@ const SwipeableCard = (inputProps: SwipeableCardProps) => {
     const absDeltaX = Math.abs(deltaX);
     const absDeltaY = Math.abs(deltaY);
 
-    const clickDurationHasNotPassed = Date.now() - clickStartTime < MAX_CLICK_DURATION;
+    const clickDurationHasNotPassed =
+      Date.now() - clickStartTime < MAX_CLICK_DURATION;
 
-    const weAreClicking = absDeltaX < 10 && absDeltaY < 10 && clickDurationHasNotPassed;
+    const weAreClicking =
+      absDeltaX < 10 && absDeltaY < 10 && clickDurationHasNotPassed;
 
     if (weAreClicking) {
       // We have clicked.
@@ -255,7 +264,10 @@ const SwipeableCard = (inputProps: SwipeableCardProps) => {
     if (absDeltaX > absDeltaY && canSwipeHorizontally) {
       if (deltaX > SWIPE_ACTION_TRIGGER_DISTANCE && props.onSwipeLeft) {
         props.onSwipeLeft();
-      } else if (deltaX < -SWIPE_ACTION_TRIGGER_DISTANCE && props.onSwipeRight) {
+      } else if (
+        deltaX < -SWIPE_ACTION_TRIGGER_DISTANCE &&
+        props.onSwipeRight
+      ) {
         props.onSwipeRight();
       } else {
         resetCard();

@@ -1,5 +1,5 @@
 import classes from "./IconButton.module.scss";
-import { JSX } from "solid-js/jsx-runtime";
+import type { JSX } from "solid-js/jsx-runtime";
 
 type IconButtonProps = {
   children: JSX.Element;
@@ -9,6 +9,7 @@ type IconButtonProps = {
 
 const IconButton = (props: IconButtonProps) => (
   <button
+    type="button"
     classList={{
       [classes.iconButton]: true,
       [props.class ?? ""]: true,

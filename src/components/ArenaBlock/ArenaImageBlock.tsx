@@ -1,4 +1,4 @@
-import { ArenaImageBlock } from "arena-ts";
+import type { ArenaImageBlock } from "arena-ts";
 import { createEffect, createSignal } from "solid-js";
 import classes from "./ArenaBlock.module.scss";
 import { useBlockContext } from "../ArenaBlockProvider";
@@ -16,7 +16,7 @@ export const ImageBlock = (props: PhotoBlockProps) => {
   const blockContext = useBlockContext();
 
   createEffect(() => {
-    let imgContainer = imgContainerRef();
+    const imgContainer = imgContainerRef();
     const ctx = blockContext;
     if (!imgContainer || !ctx) return;
 

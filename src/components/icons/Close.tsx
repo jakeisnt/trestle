@@ -1,4 +1,4 @@
-export default function Close(props) {
+export default function Close(props: { height: number; width: number }) {
   return (
     <svg
       fill="currentColor"
@@ -7,6 +7,8 @@ export default function Close(props) {
       viewBox="0 0 16 16"
       height={props.height}
       width={props.width}
+      aria-label="Close"
+      role="img"
       style={{
         overflow: "visible",
         color: "currentcolor",

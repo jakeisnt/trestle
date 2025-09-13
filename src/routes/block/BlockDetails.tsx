@@ -58,7 +58,7 @@ const BlockDetails = (props: { block: ArenaBlock }) => {
           <div class={classes.channelLinkBoxList}>
             <For
               each={props.block.connections?.filter(
-                (c) => c.status !== "private"
+                (c) => c.status !== "private",
               )}
             >
               {(c) => <ChannelLink channel={c} />}

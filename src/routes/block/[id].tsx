@@ -95,7 +95,7 @@ export default function BlockPage(props: RouteSectionProps) {
         blocks.map((block) => {
           block.image?.display.url && fetchImage(block.image.display.url);
           return block;
-        })
+        }),
       )
       .then((blocks) => setBlockList(blocks));
   });
@@ -111,7 +111,7 @@ export default function BlockPage(props: RouteSectionProps) {
     const navString = makeBlockUrl(
       blockOrdering[nextIndex],
       articleContext,
-      blockOrdering
+      blockOrdering,
     );
     navigate(navString);
   };

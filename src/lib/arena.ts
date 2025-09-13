@@ -5,7 +5,11 @@ import { cache } from "@solidjs/router";
 /**
  * Construct a URL for an internal block.
  */
-const makeBlockUrl = (blockId: number, articleContext: string, blockOrdering?: number[]) => {
+const makeBlockUrl = (
+  blockId: number,
+  articleContext: string,
+  blockOrdering?: number[],
+) => {
   if (blockOrdering) {
     return `/block/${blockId}?articleContext=${encodeURIComponent(
       articleContext,

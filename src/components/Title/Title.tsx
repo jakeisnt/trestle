@@ -12,7 +12,7 @@ import { useNavigate, useLocation } from "@solidjs/router";
 const Title = (props: { children: string }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const isRootPath = () => location.pathname === "/";
 
   const handleBackClick = () => {

@@ -1,4 +1,4 @@
-export default function ArrowRight(props) {
+export default function ArrowRight(props: { height: number; width: number }) {
   return (
     <svg
       fill="currentColor"
@@ -7,6 +7,8 @@ export default function ArrowRight(props) {
       viewBox="0 0 16 16"
       height={props.height}
       width={props.width}
+      aria-label="Arrow right"
+      role="img"
       style={{ overflow: "visible", color: "currentcolor" }}
     >
       <path

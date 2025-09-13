@@ -1,5 +1,5 @@
 import { createEffect, createSignal } from "solid-js";
-import { JSX } from "solid-js";
+import type { JSX } from "solid-js";
 
 function ProgressCircle(props: {
   fillAmount: number;
@@ -17,7 +17,8 @@ function ProgressCircle(props: {
   createEffect(() => {
     // Rotate the circle based on the fillAmount prop to show progress
     const offset =
-      circumference - (Math.min(props.fillAmount, threshold) / threshold) * circumference;
+      circumference -
+      (Math.min(props.fillAmount, threshold) / threshold) * circumference;
 
     setDashOffset(offset);
 
@@ -30,7 +31,14 @@ function ProgressCircle(props: {
   });
 
   return (
-    <svg width={`${pixelRadius()}px`} height={`${pixelRadius()}px`} viewBox="0 0 100 100">
+    <svg
+      width={`${pixelRadius()}px`}
+      height={`${pixelRadius()}px`}
+      viewBox="0 0 100 100"
+      aria-label="Progress circle"
+      role="img"
+    >
+      <title>Progress circle</title>
       <circle
         cx="50"
         cy="50"
