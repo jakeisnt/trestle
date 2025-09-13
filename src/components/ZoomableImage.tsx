@@ -236,9 +236,9 @@ const ZoomableImage = (props: ZoomableImageProps) => {
     const scaleX = (imageDimensions().width * currentScale()) / minimapWidth;
     const scaleY = (imageDimensions().height * currentScale()) / minimapHeight;
     
-    // Update pan based on drag
-    const newPanX = dragStartPanX + (deltaX * scaleX);
-    const newPanY = dragStartPanY + (deltaY * scaleY);
+    // Update pan based on drag (inverted)
+    const newPanX = dragStartPanX - (deltaX * scaleX);
+    const newPanY = dragStartPanY - (deltaY * scaleY);
     
     setPanX(newPanX);
     setPanY(newPanY);
@@ -593,26 +593,26 @@ const ZoomableImage = (props: ZoomableImageProps) => {
                 opacity: 0.6,
               }}
             />
-            {/* Viewport indicator */}
-            <div
-              ref={minimapRef}
-              style={{
-                position: "absolute",
-                border: "2px solid #fff",
-                "border-radius": "2px",
-                "background-color": isDraggingMinimap() ? "rgba(255, 255, 255, 0.4)" : "rgba(255, 255, 255, 0.2)",
-                left: `${Math.max(0, Math.min(100, 50 + (panX() / (imageDimensions().width * currentScale())) * 100))}%`,
-                top: `${Math.max(0, Math.min(100, 50 + (panY() / (imageDimensions().height * currentScale())) * 100))}%`,
-                width: `${Math.min(100, (containerDimensions().width / (imageDimensions().width * currentScale())) * 100)}%`,
-                height: `${Math.min(100, (containerDimensions().height / (imageDimensions().height * currentScale())) * 100)}%`,
-                transform: "translate(-50%, -50%)",
-                cursor: isDraggingMinimap() ? "grabbing" : "grab",
-                "user-select": "none",
-                transition: isDraggingMinimap() ? "none" : "all 0.1s ease",
-              }}
-              onMouseDown={handleMinimapDragStart}
-              onTouchStart={handleMinimapDragStart}
-            />
+                        {/* Viewport indicator */}
+                        <div
+                          ref={minimapRef}
+                          style={{
+                            position: "absolute",
+                            border: "2px solid #fff",
+                            "border-radius": "2px",
+                            "background-color": isDraggingMinimap() ? "rgba(255, 255, 255, 0.4)" : "rgba(255, 255, 255, 0.2)",
+                            left: `${Math.max(0, Math.min(100, 50 - (panX() / (imageDimensions().width * currentScale())) * 100))}%`,
+                            top: `${Math.max(0, Math.min(100, 50 - (panY() / (imageDimensions().height * currentScale())) * 100))}%`,
+                            width: `${Math.min(100, (containerDimensions().width / (imageDimensions().width * currentScale())) * 100)}%`,
+                            height: `${Math.min(100, (containerDimensions().height / (imageDimensions().height * currentScale())) * 100)}%`,
+                            transform: "translate(-50%, -50%)",
+                            cursor: isDraggingMinimap() ? "grabbing" : "grab",
+                            "user-select": "none",
+                            transition: isDraggingMinimap() ? "none" : "all 0.1s ease",
+                          }}
+                          onMouseDown={handleMinimapDragStart}
+                          onTouchStart={handleMinimapDragStart}
+                        />
           </div>
           
           {/* Zoom Controls */}
