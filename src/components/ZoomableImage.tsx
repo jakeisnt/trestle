@@ -23,6 +23,14 @@ const ZoomableImage = (props: ZoomableImageProps) => {
   const [showMinimap, setShowMinimap] = createSignal(false);
   const [imageDimensions, setImageDimensions] = createSignal({ width: 0, height: 0 });
   const [containerDimensions, setContainerDimensions] = createSignal({ width: 0, height: 0 });
+  
+  // Minimap drag state
+  const [isDraggingMinimap, setIsDraggingMinimap] = createSignal(false);
+  let minimapRef: HTMLDivElement | undefined;
+  let dragStartX = 0;
+  let dragStartY = 0;
+  let dragStartPanX = 0;
+  let dragStartPanY = 0;
 
   // Pinch-to-zoom state
   let initialDistance = 0;
@@ -148,6 +156,68 @@ const ZoomableImage = (props: ZoomableImageProps) => {
         height: containerRect.height
       });
     }
+  };
+
+  /**
+   * Handle minimap drag start
+   */
+  const handleMinimapDragStart = (e: MouseEvent | TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    setIsDraggingMinimap(true);
+    
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    
+    dragStartX = clientX;
+    dragStartY = clientY;
+    dragStartPanX = panX();
+    dragStartPanY = panY();
+  };
+
+  /**
+   * Handle minimap drag move
+   */
+  const handleMinimapDragMove = (e: MouseEvent | TouchEvent) => {
+    if (!isDraggingMinimap() || !imageRef) return;
+    
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    
+    const deltaX = clientX - dragStartX;
+    const deltaY = clientY - dragStartY;
+    
+    // Convert minimap drag to image pan
+    const minimapRect = minimapRef?.getBoundingClientRect();
+    if (!minimapRect) return;
+    
+    const minimapWidth = minimapRect.width;
+    const minimapHeight = minimapRect.height;
+    
+    // Calculate the scale factor between minimap and actual image
+    const scaleX = (imageDimensions().width * currentScale()) / minimapWidth;
+    const scaleY = (imageDimensions().height * currentScale()) / minimapHeight;
+    
+    // Update pan based on drag
+    const newPanX = dragStartPanX + (deltaX * scaleX);
+    const newPanY = dragStartPanY + (deltaY * scaleY);
+    
+    setPanX(newPanX);
+    setPanY(newPanY);
+    
+    // Apply transform to main image
+    imageRef.style.transform = `translateX(${newPanX}px) translateY(${newPanY}px) scale(${currentScale()})`;
+  };
+
+  /**
+   * Handle minimap drag end
+   */
+  const handleMinimapDragEnd = () => {
+    setIsDraggingMinimap(false);
   };
 
   /**
@@ -315,6 +385,25 @@ const ZoomableImage = (props: ZoomableImageProps) => {
     if (imageRef) {
       imageRef.addEventListener('load', updateDimensions);
     }
+    
+    // Add global mouse/touch event listeners for minimap dragging
+    const handleGlobalMouseMove = (e: MouseEvent) => handleMinimapDragMove(e);
+    const handleGlobalMouseUp = () => handleMinimapDragEnd();
+    const handleGlobalTouchMove = (e: TouchEvent) => handleMinimapDragMove(e);
+    const handleGlobalTouchEnd = () => handleMinimapDragEnd();
+    
+    document.addEventListener('mousemove', handleGlobalMouseMove);
+    document.addEventListener('mouseup', handleGlobalMouseUp);
+    document.addEventListener('touchmove', handleGlobalTouchMove, { passive: false });
+    document.addEventListener('touchend', handleGlobalTouchEnd);
+    
+    // Cleanup function
+    return () => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+      document.removeEventListener('touchmove', handleGlobalTouchMove);
+      document.removeEventListener('touchend', handleGlobalTouchEnd);
+    };
   });
 
   // Update dimensions when scale or pan changes
@@ -407,17 +496,23 @@ const ZoomableImage = (props: ZoomableImageProps) => {
             />
             {/* Viewport indicator */}
             <div
+              ref={minimapRef}
               style={{
                 position: "absolute",
                 border: "2px solid #fff",
                 "border-radius": "2px",
-                "background-color": "rgba(255, 255, 255, 0.2)",
+                "background-color": isDraggingMinimap() ? "rgba(255, 255, 255, 0.4)" : "rgba(255, 255, 255, 0.2)",
                 left: `${Math.max(0, Math.min(100, 50 + (panX() / (imageDimensions().width * currentScale())) * 100))}%`,
                 top: `${Math.max(0, Math.min(100, 50 + (panY() / (imageDimensions().height * currentScale())) * 100))}%`,
                 width: `${Math.min(100, (containerDimensions().width / (imageDimensions().width * currentScale())) * 100)}%`,
                 height: `${Math.min(100, (containerDimensions().height / (imageDimensions().height * currentScale())) * 100)}%`,
                 transform: "translate(-50%, -50%)",
+                cursor: isDraggingMinimap() ? "grabbing" : "grab",
+                "user-select": "none",
+                transition: isDraggingMinimap() ? "none" : "all 0.1s ease",
               }}
+              onMouseDown={handleMinimapDragStart}
+              onTouchStart={handleMinimapDragStart}
             />
           </div>
           
