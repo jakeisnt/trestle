@@ -77,6 +77,13 @@ $borderColor: rgba(255, 255, 255, 0.2);
     }
 }
 
+.blockImageContainer {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
 .channelLinkBoxList {
     display: flex;
@@ -113,8 +120,6 @@ $borderColor: rgba(255, 255, 255, 0.2);
     transition: opacity 100ms;
     max-width: auto;
     object-fit: contain;
-    user-select: none;
-    pointer-events: none;
 }
 
 .verticalSeparator {

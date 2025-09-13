@@ -48,14 +48,12 @@ const SwipeableCard = (inputProps: SwipeableCardProps) => {
 
   let ratio: number;
 
-
   onMount(() => {
     // remove 'overscroll effects' from the page
     document.body.style.overscrollBehavior = "none";
     // The ratio of the screen width to height
     ratio = window.innerWidth / window.innerHeight;
   });
-
 
   /**
    * Reset the card's position and scale.
@@ -154,7 +152,7 @@ const SwipeableCard = (inputProps: SwipeableCardProps) => {
   };
 
   /**
-   * Follow the user's touch movement to drag the card downwards.
+   * Folow the user's touch movement to drag the card downwards.
    */
   const handleTouchMove = (e: TouchEvent) => {
     if (!cardRef) return;

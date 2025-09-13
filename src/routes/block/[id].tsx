@@ -14,7 +14,6 @@ import { fetchBlock } from "~/lib/arena";
 
 import classes from "./block.module.scss";
 import SwipeableCard from "../../components/SwipeableCard";
-import ZoomableImage from "../../components/ZoomableImage";
 import { Close, ArrowLeft, ArrowRight, CaretUp } from "../../components/icons";
 import IconButton from "../../components/IconButton";
 import type { ArenaBlock } from "arena-ts";
@@ -38,22 +37,15 @@ const useBlockParams = () => {
   const [searchParams] = useSearchParams();
 
   const blockOrdering = (() => {
-    const ordering = searchParams.blockOrdering;
-    if (!ordering) return undefined;
-    
-    const orderString = Array.isArray(ordering) ? ordering[0] : ordering;
-    const order = orderString.split(",").map((id: string) => Number(id));
+    const order =
+      searchParams.blockOrdering?.split(",").map((id) => Number(id)) ?? [];
 
     return order.length > 0 ? order : undefined;
   })();
 
-  const articleContext = (() => {
-    const context = searchParams.articleContext;
-    if (!context) return "";
-    
-    const contextString = Array.isArray(context) ? context[0] : context;
-    return decodeURIComponent(contextString);
-  })();
+  const articleContext = searchParams.articleContext
+    ? decodeURIComponent(searchParams.articleContext)
+    : "";
 
   return {
     blockOrdering,
@@ -98,9 +90,9 @@ export default function BlockPage(props: RouteSectionProps) {
     // preventing content flash when navigating between blocks.
     // Preload all of the images for the blocks also.
     if (!blockOrdering) return;
-    Promise.all(blockOrdering.map((id: number) => fetchBlock(id)))
+    Promise.all(blockOrdering.map((id) => fetchBlock(id)))
       .then((blocks) =>
-        blocks.map((block: ArenaBlock) => {
+        blocks.map((block) => {
           block.image?.display.url && fetchImage(block.image.display.url);
           return block;
         }),
@@ -210,13 +202,15 @@ export default function BlockPage(props: RouteSectionProps) {
         }}
         refetchId={blockId()}
       >
-        <ZoomableImage
-          src={block()?.image?.display.url ?? ""}
-          alt={block()?.title ?? "arena block image"}
-          class={classes.blockImage}
-          width="100%"
-          height="100%"
-        />
+        <div class={classes.blockImageContainer}>
+          <img
+            src={block()?.image?.display.url}
+            class={classes.blockImage}
+            alt={block()?.title ?? "arena block image"}
+            width="100%"
+            height="100%"
+          />
+        </div>
         <div class={classes.verticalSeparator} />
         <div class={classes.rightPanel}>
           <Show when={block()}>
@@ -271,7 +265,7 @@ export default function BlockPage(props: RouteSectionProps) {
                         "justify-content": "center",
                       }}
                     >
-                      <CaretUp />
+                      <CaretUp width={20} height={20} />
                     </div>
                   </IconButton>
                 </Show>
