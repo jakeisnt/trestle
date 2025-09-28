@@ -43,19 +43,13 @@ const ArenaBlock = (props: ArenaBlockProps) => {
       }}
     >
       <A
-        href={
-          (() => {
-            const b = block();
-            if (b && typeof b.id === "number") {
-              return makeBlockUrl(
-                b.id,
-                articleContext,
-                blockContext?.blockIds(),
-              );
-            }
-            return "";
-          })()
-        }
+        href={(() => {
+          const b = block();
+          if (b && typeof b.id === "number") {
+            return makeBlockUrl(b.id, articleContext, blockContext?.blockIds());
+          }
+          return "";
+        })()}
       >
         <Show when={block()}>
           <Switch fallback={<div>Loading block...</div>}>
