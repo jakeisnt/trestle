@@ -6,6 +6,8 @@
     "dev": "vinxi dev",
     "build": "vinxi build",
     "start": "vinxi start",
+    "preview": "wrangler pages dev",
+    "deploy": "vinxi build && wrangler pages deploy dist",
     "lint": "biome format --write ."
   },
   "dependencies": {
@@ -13,12 +15,10 @@
     "@mdx-js/mdx": "^2.3.0",
     "@shikijs/rehype": "^1.29.2",
     "@shikijs/transformers": "^1.29.2",
-    "@shikijs/twoslash": "^1.29.2",
     "@solidjs/meta": "^0.29.4",
     "@solidjs/router": "^0.15.3",
     "@solidjs/start": "^1.2.0",
     "@t3-oss/env-core": "^0.11.1",
-    "@vercel/analytics": "^1.5.0",
     "@vinxi/plugin-mdx": "^3.7.2",
     "arena-ts": "^1.0.2",
     "solid-js": "^1.9.9",
@@ -32,7 +32,8 @@
   },
   "devDependencies": {
     "sass": "^1.93.2",
-    "vite": "^7.1.7"
+    "vite": "^7.1.7",
+    "wrangler": "^4.72.0"
   },
   "trustedDependencies": ["@biomejs/biome"]
 }
