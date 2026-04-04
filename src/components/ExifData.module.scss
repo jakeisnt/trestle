@@ -1,0 +1,56 @@
+.exifContainer {
+  margin-top: 16px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.exifTitle {
+  margin: 0 0 10px 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.exifData {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.exifRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 12px;
+  line-height: 1.4;
+  gap: 8px;
+}
+
+.exifLabel {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.exifValue {
+  color: rgba(255, 255, 255, 0.9);
+  text-align: right;
+  word-break: break-word;
+}
+
+.exifLoading {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 12px;
+  font-style: italic;
+  padding: 8px 0;
+}
+
+.exifError {
+  color: rgba(255, 100, 100, 0.7);
+  font-size: 12px;
+  padding: 4px 0;
+}
