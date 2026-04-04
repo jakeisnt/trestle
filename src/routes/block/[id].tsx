@@ -204,13 +204,22 @@ export default function BlockPage(props: RouteSectionProps) {
         refetchId={blockId()}
       >
         <div class={classes.blockImageContainer}>
-          <img
-            src={block()?.image?.display.url}
-            class={classes.blockImage}
-            alt={block()?.title ?? "arena block image"}
-            width="100%"
-            height="100%"
-          />
+          <Show
+            when={block() !== null && block()?.image?.display.url}
+            fallback={
+              <div class={classes.privateBlockPlaceholder}>
+                <span>private</span>
+              </div>
+            }
+          >
+            <img
+              src={block()?.image?.display.url}
+              class={classes.blockImage}
+              alt={block()?.title ?? "arena block image"}
+              width="100%"
+              height="100%"
+            />
+          </Show>
         </div>
         <div class={classes.verticalSeparator} />
         <div class={classes.rightPanel}>

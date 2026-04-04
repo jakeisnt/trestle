@@ -20,14 +20,19 @@ const makeBlockUrl = (
 
 /**
  * Fetch information about a block from Are.na.
+ * Returns null if the block is inaccessible (e.g. private channel).
  */
 const fetchBlock = cache(async (blockId: number) => {
   "use server";
-  return new ArenaClient({
-    token: env.ARENA_PAT,
-  })
-    .block(blockId)
-    .get();
+  try {
+    return await new ArenaClient({
+      token: env.ARENA_PAT,
+    })
+      .block(blockId)
+      .get();
+  } catch {
+    return null;
+  }
 }, "block");
 
 export { makeBlockUrl, fetchBlock };

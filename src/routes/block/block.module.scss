@@ -114,6 +114,19 @@ $borderColor: rgba(255, 255, 255, 0.2);
     width: 100%;
 }
 
+.privateBlockPlaceholder {
+    width: 200px;
+    height: 200px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
 .blockImage {
     max-height: 95%;
     max-width: 95%;
